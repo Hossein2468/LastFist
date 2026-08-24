@@ -56,4 +56,9 @@ public class PlayerMovement : MonoBehaviour
             rb.MoveRotation(smoothRotation);
         }
     }
+
+    public Vector3 GetMovementDirection()
+    {
+        return movement;
+    }
 }

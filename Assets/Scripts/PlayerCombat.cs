@@ -31,7 +31,6 @@ public class PlayerCombat : MonoBehaviour
     {
         if (Time.time - lastAttackTime < attackCooldown)
         {
-            Debug.Log("Cooldown!");
             return;
         }
 
@@ -48,9 +47,6 @@ public class PlayerCombat : MonoBehaviour
             }
             Debug.Log(enemy.name);
         }
-
-        Debug.Log("Attack time: " + Time.time);
-        Debug.Log(hitEnemies.Length);
     }
     private void OnDrawGizmosSelected()
     {

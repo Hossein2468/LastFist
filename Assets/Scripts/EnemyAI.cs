@@ -18,8 +18,9 @@ public class EnemyAI : MonoBehaviour
     public Transform player;
     public float moveSpeed;
     public float rotateSpeed; 
-    public float stopDistance;
+    public float stopDistance = 2f;
 
+    private EnemyCombat combat;
     private EnemyState currentState;
     private Rigidbody rb;
 
@@ -27,6 +28,7 @@ public class EnemyAI : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        combat = GetComponent<EnemyCombat>();
 
         ChangeState(EnemyState.Chase);
     }
@@ -37,7 +39,8 @@ public class EnemyAI : MonoBehaviour
 
     }
     void FixedUpdate()
-    {switch (currentState)
+    {
+        switch (currentState)
         {
             case EnemyState.Idle:
                 Idle();
@@ -101,7 +104,19 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        Debug.Log("Enemy Attack");
+        Vector3 direction = player.position - transform.position;
+        direction.y = 0f;
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+            Quaternion smoothRotation =  Quaternion.Slerp(rb.rotation, targetRotation, rotateSpeed * Time.fixedDeltaTime);
+
+            rb.MoveRotation(smoothRotation);
+        }
+
+        combat.Attack();
     }
 
     private void Hit()
