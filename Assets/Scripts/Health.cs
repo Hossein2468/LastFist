@@ -5,6 +5,8 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
     [SerializeField] private int maxHealth;
+
+    private Animator animator;
     private int health;
 
 
@@ -12,6 +14,7 @@ public class Health : MonoBehaviour
     void Start()
     {
         health = maxHealth;
+        animator = GetComponentInChildren<Animator>();
     }
 
     // Update is called once per frame
@@ -30,9 +33,15 @@ public class Health : MonoBehaviour
         {
             Die();
         }
+        else
+        {
+            animator.SetTrigger("Hit");
+        }
     }
     void Die()
     {
+        animator.SetTrigger("Death");
+
         Debug.Log(gameObject.name + " Died");
     }
 }

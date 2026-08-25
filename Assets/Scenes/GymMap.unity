@@ -253,7 +253,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5926816212413750182, guid: 5b3c245b042ff364f9ef455543b6fdf8, type: 3}
       propertyPath: m_Radius
-      value: 0.5
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 5926816212413750182, guid: 5b3c245b042ff364f9ef455543b6fdf8, type: 3}
       propertyPath: m_Center.y
@@ -265,7 +265,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6483057497369838872, guid: 5b3c245b042ff364f9ef455543b6fdf8, type: 3}
       propertyPath: rotateSpeed
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6483057497369838872, guid: 5b3c245b042ff364f9ef455543b6fdf8, type: 3}
       propertyPath: cameraTransform

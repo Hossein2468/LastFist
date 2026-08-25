@@ -11,7 +11,7 @@ public class PlayerDash : MonoBehaviour
     private Vector3 dashDirection;
     private Rigidbody rb;
     private PlayerMovement playerMovement;
-    private Animator anim;
+    private Animator animator;
     private bool isDashing;
     private float lastDashTime;
 
@@ -19,7 +19,7 @@ public class PlayerDash : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        anim = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
         playerMovement = GetComponent<PlayerMovement>();
     }
 
@@ -62,7 +62,7 @@ public class PlayerDash : MonoBehaviour
     {
         isDashing = true;
         lastDashTime = Time.time;
-        anim.SetBool("IsDashing", true);
+        animator.SetBool("IsDashing", true);
 
         float dashSpeed = dashDistance / dashDuration;
 
@@ -78,6 +78,6 @@ public class PlayerDash : MonoBehaviour
         }
 
         isDashing = false;
-        anim.SetBool("IsDashing", false);
+        animator.SetBool("IsDashing", false);
     }
 }

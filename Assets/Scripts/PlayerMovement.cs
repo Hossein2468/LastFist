@@ -12,13 +12,13 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask enemyLayer;
 
     private Rigidbody rb;
-    private Animator anim;
+    private Animator animator;
     private Vector3 movement;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        anim = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     // Update is called once per frame
@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
 
         movement = (forward * v + right * h).normalized;
 
-        anim.SetFloat("Speed", movement.magnitude);
+        animator.SetFloat("Speed", movement.magnitude);
     }
 
     private void FixedUpdate()
