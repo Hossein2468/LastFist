@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform cameraTransform;
     public LayerMask enemyLayer;
 
+    private PlayerCombat playerCombat;
     private Rigidbody rb;
     private Animator animator;
     private Vector3 movement;
@@ -18,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        playerCombat = GetComponent<PlayerCombat>();
         animator = GetComponentInChildren<Animator>();
     }
 
@@ -38,16 +40,22 @@ public class PlayerMovement : MonoBehaviour
 
         movement = (forward * v + right * h).normalized;
 
-        animator.SetFloat("Speed", movement.magnitude);
+        if (playerCombat.isAttacking)
+        {
+            animator.SetFloat("Speed", 0f);
+        }
+        else
+        {
+            animator.SetFloat("Speed", movement.magnitude);
+        }
     }
 
     private void FixedUpdate()
     {
-        Vector3 nextPosition = rb.position + movement * speed * Time.fixedDeltaTime;
-        bool hit = Physics.CheckSphere(nextPosition, bodyRadius, enemyLayer);
-
-        if (!hit)
+        if (!playerCombat.isAttacking)
         {
+            Vector3 nextPosition = rb.position + movement * speed * Time.fixedDeltaTime;
+
             rb.MovePosition(nextPosition);
         }
 
