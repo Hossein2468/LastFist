@@ -31,11 +31,19 @@ public class Health : MonoBehaviour
 
         if (health <= 0)
         {
-            Die();
+            // This problem will be fixed after implementng enemy animator
+            if (animator != null)
+            {
+                Die();
+            }
         }
         else
         {
-            animator.SetTrigger("Hit");
+            // This problem will be fixed after implementng enemy animator
+            if (animator != null)
+            {
+                animator.SetTrigger("Hit");
+            }
         }
     }
     void Die()
