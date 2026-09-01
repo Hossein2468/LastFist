@@ -4,78 +4,203 @@ using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
-    public float attackRange = 2f;
-    public int attackDamage = 10;
-    //public float attackCooldown = 0.5f;
-    public float comboResetTime = 1f;
-    public bool isAttacking { get; private set; }
-    public LayerMask enemyLayer;
-    public Transform attackPoint;
+    private enum AttackType
+    {
+        None,
+        Fist,
+        Kick
+    }
 
-    private Animator animator;
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
+
+    [Header("Combo")]
+    [SerializeField] private float comboResetTime = 1f;
     private int comboStep = 0;
+
+    private AttackType firstAttack = AttackType.None;
+    private AttackType secondAttack = AttackType.None;
+
+    private List<AttackType> comboInputs = new List<AttackType>();
+    private AttackType bufferedAttack = AttackType.None;
+
+    private bool comboWindowOpen;
+
     private float lastAttackTime;
+    public bool isAttacking { get; private set; }
+
+    [Header("Damage")]
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private float attackRange = 1.5f;
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private int attackDamage = 10;
+    // KnockBack will be added in future.
+    //[SerializeField] private float knockBackForce = 3f;
+
+    private readonly List<Health> hitTargets = new List<Health>();
 
     // Start is called before the first frame update
     void Start()
     {
-        animator = GetComponentInChildren<Animator>();
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Time.time - lastAttackTime > comboResetTime)
-        {
-            comboStep = 0;
-        }
+        CheckComboReset();
 
         if (Input.GetKeyDown(KeyCode.J))
         {
-            FistAttack();
+            HandleAttackInput(AttackType.Fist);
         }
 
         if (Input.GetKeyDown(KeyCode.K))
         {
-            KickAttack();
+            HandleAttackInput(AttackType.Kick);
         }
     }
 
-    void FistAttack()
+    void HandleAttackInput(AttackType attackType)
     {
-        StartCombo();
+        if (!isAttacking)
+        {
+            StartAttack(attackType);
+            return;
+        }
 
-        isAttacking = true;
-
-        animator.SetInteger("ComboStep", comboStep);
-        animator.SetTrigger("FistAttack");
+        if (comboWindowOpen)
+        {
+            if (IsValidNextAttack(attackType))
+            {
+                bufferedAttack = attackType;
+            }
+        }
     }
 
-    void KickAttack()
+    void StartAttack(AttackType attackType)
     {
-        StartCombo();
-
-        isAttacking = true;
-
-        animator.SetInteger("ComboStep", comboStep);
-        animator.SetTrigger("KickAttack");
-    }
-
-    void StartCombo()
-    {
-        lastAttackTime = Time.time;
-
+        comboInputs.Add(attackType);
         comboStep++;
 
-        if (comboStep > 3)
+        hitTargets.Clear();
+
+        if (comboStep == 1)
         {
-            comboStep = 1;
+            firstAttack = attackType;
+            secondAttack = AttackType.None;
         }
+        else if (comboStep == 2)
+        {
+            secondAttack = attackType;
+        }
+
+        isAttacking = true;
+
+        lastAttackTime = Time.time;
+
+        comboWindowOpen = false;
+
+        bufferedAttack = AttackType.None;
+
+        animator.SetInteger("ComboStep", comboStep);
+
+        if (attackType == AttackType.Fist)
+        {
+            animator.SetTrigger("FistAttack");
+        }
+        else if (attackType == AttackType.Kick)
+        {
+            animator.SetTrigger("KickAttack");
+        }
+
+    }
+
+    bool IsValidNextAttack(AttackType nextAttack)
+    {
+        if (comboInputs.Count == 0)
+        {
+            return true;
+        }
+        if (comboInputs.Count == 1)
+        {
+            return true;
+        }
+        if (comboInputs.Count == 2)
+        {
+            AttackType first = comboInputs[0];
+            AttackType second = comboInputs[1];
+
+            if (first == AttackType.Fist && second == AttackType.Fist)
+            { return nextAttack == AttackType.Kick; }
+            if (first == AttackType.Fist && second == AttackType.Kick)
+            { return nextAttack == AttackType.Fist; }
+            if (first == AttackType.Kick && second == AttackType.Fist)
+            { return nextAttack == AttackType.Fist; }
+            if (first == AttackType.Kick && second == AttackType.Kick)
+            { return nextAttack == AttackType.Fist; }
+        }
+        return false;
+    }
+    
+    public void OpenComboWindow()
+    {
+        comboWindowOpen = true;
+    }
+
+    public void CloseComboWindow()
+    {
+        comboWindowOpen = false;
     }
 
     public void EndAttack()
     {
+        comboWindowOpen = false;
+        
+        if (bufferedAttack != AttackType.None && comboStep < 3)
+        {
+            AttackType nextAttack = bufferedAttack;
+
+            bufferedAttack = AttackType.None;
+
+            StartAttack(nextAttack);
+
+            return;
+        }
+
+        FinishCombo();
+    }
+
+    void FinishCombo()
+    {
+        comboInputs.Clear();
+
         isAttacking = false;
+
+        comboWindowOpen = false;
+
+        bufferedAttack = AttackType.None;
+
+        comboStep = 0;
+
+        firstAttack = AttackType.None;
+        secondAttack = AttackType.None;
+    }
+
+    void CheckComboReset()
+    {
+        if (comboStep == 0)
+        {
+            return;
+        }
+
+        if (Time.time - lastAttackTime > comboResetTime)
+        {
+            FinishCombo();
+        }
     }
 
     public void DealDamage()
@@ -84,12 +209,22 @@ public class PlayerCombat : MonoBehaviour
 
         foreach (Collider enemy in hitEnemies)
         {
+            // Maybe GetComponentInParent<> in future.
             Health health = enemy.GetComponent<Health>();
-            if (health != null)
+            if (health == null)
             {
-                health.TakeDamage(attackDamage);
+                continue;
             }
-            Debug.Log(enemy.name);
+            if (hitTargets.Contains(health))
+            {
+                continue;
+            }
+
+            health.TakeDamage(attackDamage);
+
+            hitTargets.Add(health);
+
+            Debug.Log("Player Hit: " + health.gameObject.name);
         }
     }
 

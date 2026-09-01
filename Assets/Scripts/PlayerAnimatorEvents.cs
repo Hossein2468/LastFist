@@ -23,6 +23,16 @@ public class PlayerAnimatorEvents : MonoBehaviour
         playerCombat.EndAttack();
     }
 
+    public void OpenComboWindow()
+    {
+        playerCombat.OpenComboWindow();
+    }
+
+    public void CloseComboWindow()
+    {
+        playerCombat.CloseComboWindow();
+    }
+
     public void DealDamage()
     {
         playerCombat.DealDamage();
